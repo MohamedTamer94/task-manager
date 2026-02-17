@@ -6,10 +6,7 @@ const databaseUrl = config.databaseUrl;
 // connect to Mongo Databse
 async function connectDB() {
     try {
-        await mongoose.connect(databaseUrl, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        })
+        await mongoose.connect(databaseUrl, {})
         console.log("MongoDB connected successfully.")
     } catch (e) {
         // connection to DB failed, exit immediately

@@ -21,4 +21,8 @@ if (error) {
     process.exit(1);
 }
 
-module.exports = config;
+module.exports = {
+    databaseUrl: value.DATABASE_URL,
+    nodeEnv: value.NODE_ENV,
+    port: value.PORT
+};
