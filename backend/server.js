@@ -3,7 +3,9 @@ require("dotenv").config();
 const config = require("./config/env")
 const express = require("express");
 const connectDB = require("./config/db");
-const taskRoutes = require("./routes/tasks.route")
+const taskRoutes = require("./routes/tasks.route");
+const notFoundMiddleware = require("./middlewares/notfound.middleware");
+const errorMiddleware = require("./middlewares/error.middleware");
 const app = express();
 const port = config.port;
 
@@ -14,7 +16,11 @@ app.use('/api/tasks', taskRoutes);
 
 app.get("/health", (req, res) => {
     return res.status(200).json({status: "ok"})
-})
+});
+
+app.use(notFoundMiddleware);
+
+app.use(errorMiddleware);
 
 // start listening on the specified port and connect to DB
 async function start() {
