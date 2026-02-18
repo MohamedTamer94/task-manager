@@ -48,7 +48,7 @@ exports.listTasks = async ({
     
     // find total count for frontend pagination
     const totalCountPromise = Task.countDocuments(filters);
-    const [items, totalCount] = Promise.all(itemsPromise, totalCountPromise);
+    const [items, totalCount] = await Promise.all([itemsPromise, totalCountPromise]);
     const totalPages = Math.ceil(totalCount / limit);
     return {
         items,
@@ -58,6 +58,7 @@ exports.listTasks = async ({
 };
 
 /**
+ * Create a new task with the specified orioerties
  * 
  * @param {object} params
  * @param {string} params.title The task's title (required)
@@ -84,4 +85,35 @@ exports.createTask = async ({
     await newTask.save();
 
     return newTask;
+};
+
+/**
+ * Get one task by id
+ * 
+ * @param {string} id The task's id
+ * @returns {Promise<Task|null>}
+ */
+exports.getTask = async (id) => {
+    return await Task.findOne({_id: id, deletedAt: null})
+};
+
+/**
+ * Update an existing task. Supports partial updates
+ * 
+ * @param {string} id The to-be-updated task's id
+ * @param {object} updateParams The parameters to update
+ * @returns {Promise<Task|null>}
+ */
+exports.updateTask = async (id, updateParams) => {
+    return await Task.findOneAndUpdate({_id: id, deletedAt: null}, {$set: updateParams}, { new: true, runValidators: true, context: "query" });
+};
+
+/**
+ * Soft delete a task
+ * 
+ * @param {string} id The to-be-deleted task's id
+ * @returns {Promise<Task|null>}
+ */
+exports.deleteTask = async (id) => {
+    return await Task.findOneAndUpdate({_id: id, deletedAt: null}, {$set: {deletedAt: new Date()}}, {new: true});
 };

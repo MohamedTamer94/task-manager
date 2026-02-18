@@ -1,7 +1,11 @@
 const {
     listTasks: listTasksService,
-    createTask: createTaskService
+    createTask: createTaskService,
+    getTask: getTaskService,
+    updateTask: updateTaskService,
+    deleteTask: deleteTaskService
 } = require("../services/tasks.service");
+const ApiError = require("../utils/ApiError");
 exports.getAllTasks = async (req, res) => {
     // parse query to get required fields for pagination and filtering
     const {
@@ -18,7 +22,7 @@ exports.getAllTasks = async (req, res) => {
 
     return res.json({
         data: [...result.items],
-        meta: {page: page, limit: limit, total: result.totalCount, pages: result.totalPages}
+        meta: { page: page, limit: limit, total: result.totalCount, pages: result.totalPages }
     })
 };
 
@@ -31,19 +35,50 @@ exports.createTask = async (req, res) => {
         dueDate
     } = req.validated.body;
 
-    let task = await createTaskService({title, description, status, priority, dueDate});
+    let task = await createTaskService({ title, description, status, priority, dueDate });
 
-    return res.status(201).json({message: "Task created successfully", success: true, data: task});
+    return res.status(201).json({ message: "Task created successfully", success: true, data: task });
 };
 
-exports.getTask = (req, res) => {
-    // TODO: Implement
+exports.getTask = async (req, res, next) => {
+    const { id } = req.validated.params;
+
+    const task = await getTaskService(id);
+
+    if (!task) {
+        return next(ApiError.notFound(`Task with id ${id} can't be found`, {
+            code: "NOT_FOUND"
+        }));
+    }
+
+    return res.json({ data: task })
 };
 
-exports.updateTask = (req, res) => {
-    // TODO: Implement
+exports.updateTask = async (req, res, next) => {
+    const { id } = req.validated.params;
+    const updateParams = req.validated.body;
+
+    const task = await updateTaskService(id, updateParams);
+
+    if (!task) {
+        return next(ApiError.notFound(`Task with id ${id} can't be found`, {
+            code: "NOT_FOUND"
+        }));
+    }
+
+    return res.json({ data: task, success: true })
 };
 
-exports.deleteTask = (req, res) => {
-    // TODO: Implement
+exports.deleteTask = async (req, res, next) => {
+    const { id } = req.validated.params;
+
+    const task = await deleteTaskService(id);
+
+    if (!task) {
+        return next(ApiError.notFound(`Task with id ${id} can't be found`, {
+            code: "NOT_FOUND"
+        }));
+    }
+
+    return res.status(204);
 };

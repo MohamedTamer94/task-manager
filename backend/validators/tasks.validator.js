@@ -60,7 +60,37 @@ const createTaskBodySchema = joi.object({
         .description("The task's due date.")
 }).unknown(false);
 
+const idParamSchema = joi.object({
+    id: joi.string()
+        .hex()
+        .length(24)
+        .required()
+}).unknown(false);
+    
+const updateTaskBodySchema = joi.object({
+    title: joi.string()
+        .trim()
+        .min(3)
+        .description("The task's title"),
+    description: joi.string()
+        .optional()
+        .description("The task's description"),
+    status: joi.string()
+        .valid("todo", "doing", "done")
+        .optional()
+        .description("The task's status. Must be either: todo, doing, or done"),
+    priority: joi.string()
+        .valid("low", "medium", "high")
+        .optional()
+        .description("The task's priority. Must be either: low, medium, or high"),
+    dueDate: joi.date()
+        .optional()
+        .description("The task's due date.")
+}).unknown(false).min(1);
+
 module.exports = {
     listTasksQuerySchema,
-    createTaskBodySchema
+    createTaskBodySchema,
+    idParamSchema,
+    updateTaskBodySchema
 };
