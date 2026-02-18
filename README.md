@@ -107,10 +107,10 @@ VITE_API_BASE_URL=http://localhost:3001/api
 
 3- Run vite app
 ````
-vite
+npm run dev
 ````
 ## API Design
-#### POST `/api/tasks`
+#### POST `/tasks`
 Create new task.
 
 Request Body:
@@ -337,7 +337,7 @@ Likewise, frontend was separated into
 - API, calling backend functions and returning data separately from UI
 
 ### Joi + Mongoose Validation
-Validation is an essential layer in any backend application. Without it, the app's security is at a great risk (XSS Attacks, SQL injection, etc..), unwanted data are allowed, and the whole user experience is ruined.
+Validation is an essential layer in any backend application. Without it, allowing database hijacking, unwanted data are allowed, and the whole user experience is ruined.
 
 A multi-layer validation approach was implemented in this app. 
 
@@ -385,3 +385,6 @@ Logging is implemented at a basic level (HTTP request logging and error logging)
 
 For production environments, structured logging (e.g., with Pino or Winston), centralized log aggregation, and monitoring tools would be introduced.
 
+
+## Engineering Notes
+Further thoughts about production deployment, scalability, and maintainability is discussed in `ENGINEERING_NOTES.md`
