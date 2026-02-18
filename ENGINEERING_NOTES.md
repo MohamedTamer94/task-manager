@@ -15,23 +15,23 @@ Multiple considerations could be taken for this service to scale to 1 million ta
 
 First, proper indexing is required (which is already implemented, as covered in the next section) to make read requests faster and more efficient.
 
-Read replicas — read-only copies of the database — could be deployed to increase the capacity and performance of read queries. By redirecting read traffic to the replicas, the primary database is freed up to handle write requests more effectively.
+Read replicas (read-only copies of the database) could be deployed to increase the capacity and performance of read queries. By redirecting read traffic to the replicas, the primary database is freed up to handle write requests more effectively.
 
 Cursor-based pagination using `_id` or `createdAt` indexed fields would also be a good idea at this scale, since offset pagination introduces a significant performance penalty on large datasets.
 
 Caching through Redis would remove a substantial load from the database. A Cache-Aside strategy would mean the database is only accessed on a cache miss, keeping the hot path fast.
 
-Finally, horizontal scaling — adding new server instances behind a load balancer — would distribute the workload and increase availability as the number of tasks grows.
+Finally, horizontal scaling, by adding new server instances behind a load balancer, would distribute the workload and increase availability as the number of tasks grows.
 
 ## 2. What indexing strategy would you apply and why?
 
 The indexing strategy follows the actual query patterns of the service rather than speculating upfront.
 
-- `{ deletedAt: 1 }` — every query filters on non-deleted tasks, so this is foundational.
-- `{ status: 1, deletedAt: 1 }` — filtering by status is one of the most common operations.
-- `{ priority: 1, deletedAt: 1 }` — same reasoning as status.
-- `{ dueDate: 1, deletedAt: 1 }` — required for date range queries.
-- Text index on `title` — to support search. For higher traffic or more complex search needs, this would be offloaded to a dedicated search engine like Elasticsearch.
+- `{ deletedAt: 1 }`: every query filters on tasks (to filter out soft deleted ones), so this is foundational.
+- `{ status: 1, deletedAt: 1 }`: filtering by status is one of the most common operations.
+- `{ priority: 1, deletedAt: 1 }`: same reasoning as status.
+- `{ dueDate: 1, deletedAt: 1 }`: required for date range queries.
+- Text index on `title` : to support search. For higher traffic or more complex search needs, this would be offloaded to a dedicated search engine like Elasticsearch.
 
 Indexes are aligned with actual filter conditions to avoid unnecessary overhead. Over-indexing was intentionally avoided to keep write performance efficient.
 
@@ -46,7 +46,7 @@ I would introduce JWT-based authentication with the following steps:
 5. Update all queries to include `userId` filtering to enforce data ownership.
 6. Implement login and signup pages with their respective backend endpoints.
 
-For authorization, I would implement role-based access control (RBAC). For collaboration features, roles like owner, editor, and viewer would be defined, with access checks enforced at the service layer — not just the route level.
+For authorization, I would implement role-based access control (RBAC). For collaboration features, roles like owner, editor, and viewer should be applied, with access checks enforced to prevent leaks.
 
 ## 4. How would you deploy this in production?
 
@@ -69,14 +69,14 @@ For reliability, I would configure auto-restart policies on container failure, c
 
 GitHub Actions would be sufficient for this pipeline.
 
-**CI** — runs on every pull request:
+**CI**: runs on every pull request:
 1. Install dependencies
 2. Lint
 3. Run unit tests (if present)
 4. Build frontend
 5. Ensure backend compiles
 
-**CD** — triggers on merge to main:
+**CD**: triggers on merge to main:
 1. Build Docker image
 2. Push to container registry
 3. Deploy to staging
