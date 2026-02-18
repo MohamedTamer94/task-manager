@@ -328,7 +328,7 @@ Possible Errors:
 
 ### Layered Architecture
 
-API, business logic, database schemas, and routes are separated to enhance maintainability, scalability, and code organization. Every layer has its own isolated responsibilities (i.e. separation of concerns). Debugging and maintaining becomes easier as fixing a single issue or adding a new feature doesn't require restructuring the whole codebase. Scalability is also enhanced as each layer can scale independently — for example, allocating more resources to the database layer without impacting the services layer. Separation of concerns also allows reusability of common pieces of the codebase, eliminating redundancy.
+API, business logic, database schemas, and routes are separated to enhance maintainability, scalability, and code organization. Every layer has its own isolated responsibilities (i.e. separation of concerns). Debugging and maintaining becomes easier as fixing a single issue or adding a new feature doesn't require restructuring the whole codebase. Scalability is also enhanced as each layer can scale independently; for example, allocating more resources to the database layer without impacting the services layer. Separation of concerns also allows reusability of common pieces of the codebase, eliminating redundancy.
 
 This can be easily seen in both the backend and frontend modules. The backend was separated into:
 - Routes (Endpoint Definition)
@@ -337,27 +337,27 @@ This can be easily seen in both the backend and frontend modules. The backend wa
 - Models (MongoDB ODM Schema definitions)
 
 Likewise, the frontend was separated into:
-- Pages — the main wrapper of all components, useful when expanding into a multi-page app
-- Components — reusable widgets to be used all over the app
-- API — calling backend functions and returning data separately from the UI
+- Pages: the main wrapper of all components, useful when expanding into a multi-page app
+- Components: reusable widgets to be used all over the app
+- API: calling backend functions and returning data separately from the UI
 
 ### Joi + Mongoose Validation
 
 Validation is an essential layer in any backend application. Without it, the database is open to hijacking, unwanted data slips through, and the user experience breaks down.
 
-A multi-layer validation approach was implemented in this app. First, at the request level, Joi ensures all data syntax is valid and handles sanitization and transformation. Second, Mongoose validation operates at the application level (just before saving to the database), acting as a safety net to ensure that data — even if it passed API-level checks — is appropriate for the database schema.
+A multi-layer validation approach was implemented in this app. First, at the request level, Joi ensures all data syntax is valid and handles sanitization and transformation. Second, Mongoose validation operates at the application level (just before saving to the database), acting as a safety net to ensure that data (even if it passed API-level checks) is appropriate for the database schema.
 
 ### Soft Deletion
 
-Soft deletion marks data as deleted using a `deletedAt` timestamp rather than physically removing it from the database, allowing for easy data recovery, auditing, and maintaining historical relationships. It prevents accidental data loss, enables a user-friendly "undo" functionality (future), and helps with compliance by retaining data for record-keeping purposes.
+Soft deletion marks data as deleted using a `deletedAt` timestamp rather than physically removing it from the database, allowing for easy data recovery, auditing, and maintaining historical relationships. It prevents accidental data loss, enables a user-friendly "undo" functionality (to be implemented in the future), and helps with compliance by retaining data for record-keeping purposes.
 
 ### Why skip/limit Pagination
 
-Skip/limit (offset-based) pagination divides large database result sets into small, manageable chunks, improving API response times and enhancing user experience. It's a straightforward, easy-to-implement technique that works well for small to medium datasets. As data grows and performance degrades at large offsets, migrating to cursor-based pagination would be the natural next step.
+Skip/limit (offset-based) pagination divides large database result sets into small, manageable chunks, improving API response times and enhancing user experience. It's a straightforward, easy-to-implement technique that works well for small to medium datasets. However, as data grows and performance degrades at large offsets, migrating to cursor-based pagination would be the natural next step.
 
 ### Why React Query on the Frontend
 
-React Query (part of the TanStack Query library) manages server-side data with minimal boilerplate, automating complex tasks like fetching, caching, synchronization, and error handling. Its main advantage is replacing repetitive data-fetching logic — manual loading/error states, `useEffect`, `try/catch` — with simple, declarative hooks like `useQuery` and `useMutation`, making the code cleaner and easier to maintain. It also supports caching, optimistic updates, and scales well as the app grows.
+React Query (part of the TanStack Query library) manages server-side data with minimal boilerplate, automating complex tasks like fetching, caching, synchronization, and error handling. Its main advantage is replacing repetitive data-fetching logic such as manual loading/error states, `useEffect`, `try/catch` with simple, declarative hooks like `useQuery` and `useMutation`, making the code cleaner and easier to maintain. It also supports caching, optimistic updates, and scales well as the app grows.
 
 ## Trade-offs
 
@@ -367,7 +367,7 @@ This implementation uses offset-based pagination (skip + limit) for simplicity a
 
 ### 2. No Authentication Layer (Out of Scope)
 
-Authentication and authorization were intentionally excluded for simplicity, allowing more focus on core logic and system design. In a production system, tasks would be associated with a user entity — likely through a `tasks.userId` field — and role-based access control would be implemented.
+Authentication and authorization were intentionally excluded for simplicity, allowing more focus on core logic and system design. In a production system, tasks would be associated with a user entity (likely through a `tasks.userId` field) and role-based access control would be implemented. Read more in the engineering discussion document. 
 
 ### 3. Query Invalidation Instead of Optimistic Updates
 
