@@ -3,7 +3,7 @@ const ApiError = require("../utils/ApiError");
 const validate = (schemas = {}) => (req, res, next) => {
     const options = {
         abortEarly: false,      // collect all errors
-        allowUnknown: true,     // allow extra fields
+        allowUnknown: false,
         stripUnknown: true,     // remove unknown keys
         convert: true,          // cast strings -> numbers, etc.
     }

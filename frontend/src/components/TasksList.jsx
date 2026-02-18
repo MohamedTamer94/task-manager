@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData  } from '@tanstack/react-query';
 import { formatDate } from '../utils/utils';
 import { listTasks } from '../api/tasks.api';
 import Pagination from '../components/Pagination';
@@ -40,7 +40,7 @@ export default function TaskLists() {
             ...(filters.dateFrom ? { from: filters.dateFrom }     : {}),
             ...(filters.dateTo   ? { to: filters.dateTo }         : {}),
         }),
-        keepPreviousData: true,
+        placeholderData: keepPreviousData,
         staleTime: 10_000,
     });
 

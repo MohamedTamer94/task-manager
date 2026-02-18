@@ -46,6 +46,7 @@ taskSchema.index({ priority: 1, deletedAt: 1 });
 taskSchema.index({ dueDate: 1, deletedAt: 1 });
 taskSchema.index({ status: 1, deletedAt: 1 });
 taskSchema.index({ title: "text" });
+taskSchema.index({ deletedAt: 1, dueDate: -1, createdAt: -1 })
 
 const Task = mongoose.model('Task', taskSchema);
 

@@ -26,10 +26,13 @@ const normalizeMongooseErrors = (err) => {
 
 const errorMiddleware = (err, req, res, next) => {
     // normalize ApiError
-    const isApiError = err instanceof ApiError;
+    let isApiError = err instanceof ApiError;
     if (!isApiError) {
         const normalized = normalizeMongooseErrors(err);
-        if (normalized) err = normalized;
+        if (normalized) {
+            err = normalized;
+            isApiError = true;
+        }
     }
 
     const statusCode = isApiError ? err.statusCode : (typeof err.status === "number" ? err.status : 500);

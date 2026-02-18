@@ -38,7 +38,7 @@ exports.listTasks = async ({
     }
     if (q) {
         // match when search appears anywhere in text, case insensitive
-        filters.title = {$regex: q, $options: "i"};
+        filters.$text = {$search: q};
     }
     const itemsPromise = Task.find(filters)
         .sort({dueDate: - 1, createdAt: -1})
@@ -49,7 +49,7 @@ exports.listTasks = async ({
     // find total count for frontend pagination
     const totalCountPromise = Task.countDocuments(filters);
     const [items, totalCount] = await Promise.all([itemsPromise, totalCountPromise]);
-    const totalPages = Math.ceil(totalCount / limit);
+    const totalPages = Math.max(1, Math.ceil(totalCount / limit));
     return {
         items,
         totalCount,
