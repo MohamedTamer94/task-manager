@@ -80,5 +80,5 @@ exports.deleteTask = async (req, res, next) => {
         }));
     }
 
-    return res.status(204);
+    return res.status(200).json({success: true});
 };

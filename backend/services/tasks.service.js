@@ -105,7 +105,7 @@ exports.getTask = async (id) => {
  * @returns {Promise<Task|null>}
  */
 exports.updateTask = async (id, updateParams) => {
-    return await Task.findOneAndUpdate({_id: id, deletedAt: null}, {$set: updateParams}, { new: true, runValidators: true, context: "query" });
+    return await Task.findOneAndUpdate({_id: id, deletedAt: null}, {$set: updateParams}, { returnDocument: 'after', runValidators: true, context: "query" });
 };
 
 /**
@@ -115,5 +115,5 @@ exports.updateTask = async (id, updateParams) => {
  * @returns {Promise<Task|null>}
  */
 exports.deleteTask = async (id) => {
-    return await Task.findOneAndUpdate({_id: id, deletedAt: null}, {$set: {deletedAt: new Date()}}, {new: true});
+    return await Task.findOneAndUpdate({_id: id, deletedAt: null}, {$set: {deletedAt: new Date()}}, {returnDocument: 'after'});
 };

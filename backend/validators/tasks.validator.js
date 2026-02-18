@@ -44,6 +44,7 @@ const createTaskBodySchema = joi.object({
         .description("The task's title"),
     description: joi.string()
         .optional()
+        .allow('')
         .description("The task's description"),
     status: joi.string()
         .valid("todo", "doing", "done")

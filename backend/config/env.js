@@ -4,7 +4,9 @@ const schema = joi.object({
 
     PORT: joi.number().integer().min(1).max(65535).default(3001),
 
-    DATABASE_URL: joi.string().uri().required()
+    DATABASE_URL: joi.string().uri().required(),
+
+    ALLOWED_ORIGIN: joi.string().uri().default("http://localhost:5173")
 }).unknown(true);
 
 const { value, error } = schema.validate(process.env, {
@@ -24,5 +26,6 @@ if (error) {
 module.exports = {
     databaseUrl: value.DATABASE_URL,
     nodeEnv: value.NODE_ENV,
-    port: value.PORT
+    port: value.PORT,
+    allowedOrigin: value.ALLOWED_ORIGIN
 };

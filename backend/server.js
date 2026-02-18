@@ -2,6 +2,7 @@
 require("dotenv").config();
 const config = require("./config/env")
 const express = require("express");
+const cors = require('cors');
 const connectDB = require("./config/db");
 const taskRoutes = require("./routes/tasks.route");
 const notFoundMiddleware = require("./middlewares/notfound.middleware");
@@ -10,6 +11,10 @@ const app = express();
 const port = config.port;
 
 app.use(express.json());
+
+app.use(cors({
+  origin: config.allowedOrigin
+}))
 
 // setup routes
 app.use('/api/tasks', taskRoutes);
