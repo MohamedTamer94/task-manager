@@ -28,7 +28,17 @@ const taskSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
-}, { timestamps: true });
+}, {
+    timestamps: true, versionKey: false, toJSON: {
+        virtuals: true,
+        transform(doc, ret) {
+            ret.id = ret._id;
+            delete ret._id;
+            delete ret.deletedAt; // soft delete meta data not needed on frontend
+            delete ret.__v;
+        }
+    }
+});
 
 // add indexes to make queries faster
 taskSchema.index({ status: 1, dueDate: 1 });

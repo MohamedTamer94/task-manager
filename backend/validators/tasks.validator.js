@@ -36,6 +36,31 @@ const listTasksQuerySchema = joi.object({
         .description("Get results to a specific due date limit.")
 }).unknown(false);
 
+const createTaskBodySchema = joi.object({
+    title: joi.string()
+        .trim()
+        .required()
+        .min(3)
+        .description("The task's title"),
+    description: joi.string()
+        .optional()
+        .description("The task's description"),
+    status: joi.string()
+        .valid("todo", "doing", "done")
+        .optional()
+        .default("todo")
+        .description("The task's status. Must be either: todo, doing, or done"),
+    priority: joi.string()
+        .valid("low", "medium", "high")
+        .optional()
+        .default("medium")
+        .description("The task's priority. Must be either: low, medium, or high"),
+    dueDate: joi.date()
+        .optional()
+        .description("The task's due date.")
+}).unknown(false);
+
 module.exports = {
-    listTasksQuerySchema
+    listTasksQuerySchema,
+    createTaskBodySchema
 };

@@ -1,4 +1,7 @@
-const {listTasks: listTasksService} = require("../services/tasks.service");
+const {
+    listTasks: listTasksService,
+    createTask: createTaskService
+} = require("../services/tasks.service");
 exports.getAllTasks = async (req, res) => {
     // parse query to get required fields for pagination and filtering
     const {
@@ -11,7 +14,7 @@ exports.getAllTasks = async (req, res) => {
         to
     } = req.validated.query;
 
-    const result = await listTasksService(page, limit, q, status, priority, from, to);
+    const result = await listTasksService({ page, limit, q, status, priority, from, to });
 
     return res.json({
         data: [...result.items],
@@ -19,8 +22,18 @@ exports.getAllTasks = async (req, res) => {
     })
 };
 
-exports.createTask = (req, res) => {
-    // TODO: Implement
+exports.createTask = async (req, res) => {
+    const {
+        title,
+        description,
+        status,
+        priority,
+        dueDate
+    } = req.validated.body;
+
+    let task = await createTaskService({title, description, status, priority, dueDate});
+
+    return res.status(201).json({message: "Task created successfully", success: true, data: task});
 };
 
 exports.getTask = (req, res) => {

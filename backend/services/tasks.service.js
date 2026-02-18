@@ -1,18 +1,27 @@
 const Task = require("../models/Task");
 
 /**
-    Fetch tasks using the given pagination and filtering constrains
-    @param {number} page - Page number, starts from 1
-    @param {number} limit - Number of items per page, maximum is 100
-    @param {string} q - Search query (optional)
-    @param {string} status - filter results by status (optional)
-    @param {string} priority - filter results by priority (optional)
-    @param {string} from - limits to results since a specific date (optional)
-    @param {string} to - limits to results until a specific date (optional)
-    
-    @returns {{items: Task[], totalCount: number, totalPages: number}}
-*/
-exports.listTasks = async (page, limit, q, status, priority, from, to) => {
+ * Fetch tasks using the given pagination and filtering constraints
+ * @param {Object} params
+ * @param {number} params.page - Page number, starts from 1
+ * @param {number} params.limit - Number of items per page, maximum is 100
+ * @param {string} [params.q] - Search query (optional)
+ * @param {string} [params.status] - Filter results by status (optional)
+ * @param {string} [params.priority] - Filter results by priority (optional)
+ * @param {string} [params.from] - Limits to results since a specific date (optional)
+ * @param {string} [params.to] - Limits to results until a specific date (optional)
+ *
+ * @returns {Promise<{items: Task[], totalCount: number, totalPages: number}>}
+ */
+exports.listTasks = async ({
+  page,
+  limit,
+  q,
+  status,
+  priority,
+  from,
+  to
+}) => {
     const skip = (page - 1) * limit;
 
     let filters = { deletedAt: null }; // to make soft-delete work
@@ -29,20 +38,50 @@ exports.listTasks = async (page, limit, q, status, priority, from, to) => {
     }
     if (q) {
         // match when search appears anywhere in text, case insensitive
-        filters.text = {$regex: q, $options: "i"};
+        filters.title = {$regex: q, $options: "i"};
     }
-    const items = await Task.find(filters)
+    const itemsPromise = Task.find(filters)
         .sort({dueDate: - 1, createdAt: -1})
         .skip(skip)
         .limit(limit)
         .exec();
     
     // find total count for frontend pagination
-    const totalCount = await Task.countDocuments(filters);
+    const totalCountPromise = Task.countDocuments(filters);
+    const [items, totalCount] = Promise.all(itemsPromise, totalCountPromise);
     const totalPages = Math.ceil(totalCount / limit);
     return {
         items,
         totalCount,
         totalPages
     }
-}
+};
+
+/**
+ * 
+ * @param {object} params
+ * @param {string} params.title The task's title (required)
+ * @param {string} [params.description] The task's description (optional)
+ * @param {string} [params.status] The task's status (todo, doing, done) (optional)
+ * @param {string} [params.priority] The task's priority (low, medium, high) (optional)
+ * @param {Date} params.dueDate The task's due date (optional)
+ * @returns {Promise<Task>}
+ */
+exports.createTask = async ({
+    title,
+    description,
+    status,
+    priority,
+    dueDate
+}) => {
+    const newTask = new Task({
+        title,
+        description,
+        status,
+        priority,
+        dueDate
+    });
+    await newTask.save();
+
+    return newTask;
+};
