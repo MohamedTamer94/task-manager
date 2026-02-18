@@ -1,71 +1,56 @@
 # Engineering Notes
+
+## Table of Contents
+
+- [1. How would this service scale to handle 1 million tasks?](#1-how-would-this-service-scale-to-handle-1-million-tasks)
+- [2. What indexing strategy would you apply and why?](#2-what-indexing-strategy-would-you-apply-and-why)
+- [3. How would you introduce authentication and authorization?](#3-how-would-you-introduce-authentication-and-authorization)
+- [4. How would you deploy this in production?](#4-how-would-you-deploy-this-in-production)
+- [5. How would you structure CI/CD for this project?](#5-how-would-you-structure-cicd-for-this-project)
+- [6. What monitoring and logging tools would you introduce?](#6-what-monitoring-and-logging-tools-would-you-introduce)
+
 ## 1. How would this service scale to handle 1 million tasks?
-Multiple considerations could be taken for this service to scale to 1 million tasks effeciently. 
 
-First, proper indexing is required (which is implemented, as you can see in the next section), to make read requests faster and more effecient.
+Multiple considerations could be taken for this service to scale to 1 million tasks efficiently.
 
-Read replicas (i.e: read-only copies of the database) could be deployed to increase capacity and performance of read queries. By redirecting read requests to the replicas, the main database performs better to manage write requests.
+First, proper indexing is required (which is already implemented, as covered in the next section) to make read requests faster and more efficient.
 
-Moreover, cursor-based pagination, using `_id` or `createdAt` indexed fields would be a good idea with such a large dataset, since offset pagination would cause a great performance penalty. 
+Read replicas — read-only copies of the database — could be deployed to increase the capacity and performance of read queries. By redirecting read traffic to the replicas, the primary database is freed up to handle write requests more effectively.
 
-Another idea would be to implement caching through Redis, removing a great load from the database. Using a strategy such as Cache-Aside would mean that database would only be accessed when there's a cache miss.
+Cursor-based pagination using `_id` or `createdAt` indexed fields would also be a good idea at this scale, since offset pagination introduces a significant performance penalty on large datasets.
 
-Finally, horizontal scaling, by adding new server instances, to the system to distribute the workload through a load balancer would increase availability for requests accompanied by a large number of tasks like this.
+Caching through Redis would remove a substantial load from the database. A Cache-Aside strategy would mean the database is only accessed on a cache miss, keeping the hot path fast.
+
+Finally, horizontal scaling — adding new server instances behind a load balancer — would distribute the workload and increase availability as the number of tasks grows.
 
 ## 2. What indexing strategy would you apply and why?
-Indexing strategy depends on query patterns.
 
-For this service:
+The indexing strategy follows the actual query patterns of the service rather than speculating upfront.
 
-- { deletedAt: 1 }
+- `{ deletedAt: 1 }` — every query filters on non-deleted tasks, so this is foundational.
+- `{ status: 1, deletedAt: 1 }` — filtering by status is one of the most common operations.
+- `{ priority: 1, deletedAt: 1 }` — same reasoning as status.
+- `{ dueDate: 1, deletedAt: 1 }` — required for date range queries.
+- Text index on `title` — to support search. For higher traffic or more complex search needs, this would be offloaded to a dedicated search engine like Elasticsearch.
 
-Because every query filters on non-deleted tasks.
-
-- `{ status: 1, deletedAt: 1 }`
-
-Since filtering by status is common.
-
-- `{ priority: 1, deletedAt: 1 }`
-
-Same reasoning as status.
-
-- `{ dueDate: 1, deletedAt: 1 }`
-
-For date range queries.
-
-Text index on title (or carefully optimized search strategy)
-To support search capability.
-
-Indexes are aligned with actual filter conditions to avoid unnecessary overhead. I avoided over-indexing to keep write performance efficient.
+Indexes are aligned with actual filter conditions to avoid unnecessary overhead. Over-indexing was intentionally avoided to keep write performance efficient.
 
 ## 3. How would you introduce authentication and authorization?
 
-I would introduce JWT-based authentication
+I would introduce JWT-based authentication with the following steps:
 
-#### Steps:
-1- First, I will add `User` model
+1. Add a `User` model.
+2. Associate every task with a `userId` (or `organizationId` for future multi-tenant support).
+3. Require a JWT in request headers for all protected routes.
+4. Add middleware to validate the token and attach the user to the request object.
+5. Update all queries to include `userId` filtering to enforce data ownership.
+6. Implement login and signup pages with their respective backend endpoints.
 
-2- I will associate every task with `userId` (or maybe `organizationId` for multi-tenant support)
-
-3- Require JWT in request headers
-
-4- Use middleware to validate token and attach user to request.
-
-5- Update all queries to include userId filtering to enforce ownership.
-
-6- Implement log-in and sign-up pages with their respective backend endpoints
-
-For authorization:
-
-- Implement role-based access control (RBAC).
-
-- For collaboration features, define roles such as owner, editor, viewer.
-
-- Enforce access checks at the service layer.
+For authorization, I would implement role-based access control (RBAC). For collaboration features, roles like owner, editor, and viewer would be defined, with access checks enforced at the service layer — not just the route level.
 
 ## 4. How would you deploy this in production?
 
-I would containerize this using Docker.
+I would containerize the app using Docker.
 
 Deployment setup:
 - I will put Node.JS API behind a reverse proxy (NGINX)
@@ -78,62 +63,32 @@ Frontend:
 
 - Built with Vite and deployed on a CDN (e.g., Vercel or similar).
 
-For reliability:
-
-- Use auto-restart policies.
-
-- Implement centralized logging.
-
-- Enable basic monitoring alerts.
+For reliability, I would configure auto-restart policies on container failure, centralized logging, and basic monitoring alerts to catch issues before users do.
 
 ## 5. How would you structure CI/CD for this project?
 
-CI:
-Steps:
-
-- Install dependencies
-
-- Lint
-
-- Run unit tests (if present)
-
-- Build frontend
-
-- Ensure backend compiles
-
-CD:
-
-- On merge to main:
-
-    - Build Docker image
-
-    - Push to container registry
-
-    - Deploy to staging
-
-    - Run smoke tests
-
-    - Promote to production
-
 GitHub Actions would be sufficient for this pipeline.
 
+**CI** — runs on every pull request:
+1. Install dependencies
+2. Lint
+3. Run unit tests (if present)
+4. Build frontend
+5. Ensure backend compiles
+
+**CD** — triggers on merge to main:
+1. Build Docker image
+2. Push to container registry
+3. Deploy to staging
+4. Run smoke tests
+5. Promote to production
+
+Production promotion would ideally require a manual approval step or be gated behind a tagged release to avoid accidental deployments.
+
 ## 6. What monitoring and logging tools would you introduce?
-For logging:
 
-- Structured logging using Pino or Winston.
+For logging, I would introduce structured logging using Pino or Winston, with request IDs attached to every log entry for traceability across services.
 
-- Include request IDs for traceability.
+For monitoring, Prometheus + Grafana would cover infrastructure metrics like CPU, memory, and request throughput. An APM tool like Datadog or New Relic would handle performance tracing and slow query detection. Sentry would be added for both frontend and backend error tracking, giving stack traces with context rather than just raw logs.
 
-For monitoring:
-
-- Prometheus + Grafana for metrics.
-
-- APM tool (e.g., Datadog, New Relic) for performance tracing.
-
-- Sentry for frontend and backend error tracking.
-
-Additionally:
-
-- Monitor database performance metrics.
-
-- Track response times and error rates.
+On top of that, database performance metrics, response times, and error rates would all be tracked with alerting thresholds so issues surface before users report them.
