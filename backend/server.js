@@ -22,6 +22,17 @@ app.use(notFoundMiddleware);
 
 app.use(errorMiddleware);
 
+// handle any uncaught exceptions or rejections
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection:", reason);
+  process.exit(1);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1);
+});
+
 // start listening on the specified port and connect to DB
 async function start() {
     await connectDB();

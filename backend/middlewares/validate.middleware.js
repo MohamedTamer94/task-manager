@@ -7,6 +7,8 @@ const validate = (schemas = {}) => (req, res, next) => {
         stripUnknown: true,     // remove unknown keys
         convert: true,          // cast strings -> numbers, etc.
     }
+    const results = {};
+
     for (const [part, schema] of Object.entries(schemas)) {
         if (!schema) continue;
         
@@ -23,7 +25,9 @@ const validate = (schemas = {}) => (req, res, next) => {
                 cause: error
             }));
         }
+        results[part] = value;
     }
+    req.validated = results;
     next();
 }
 

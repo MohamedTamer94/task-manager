@@ -56,6 +56,15 @@ const errorMiddleware = (err, req, res, next) => {
         }
     }
 
+    if (statusCode >= 500) {
+        console.error("[UNEXPECTED_ERROR]", {
+            method: req.method,
+            url: req.originalUrl,
+            message: err.message,
+            stack: err.stack,
+        });
+    }
+
     return res.status(statusCode).json(payload);
 }
 
