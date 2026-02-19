@@ -1,4 +1,5 @@
 const Task = require("../models/Task");
+const { escapeRegex } = require("../utils/search");
 
 /**
  * Fetch tasks using the given pagination and filtering constraints
@@ -38,7 +39,9 @@ exports.listTasks = async ({
     }
     if (q) {
         // match when search appears anywhere in text, case insensitive
-        filters.$text = {$search: q};
+        if (q && q.length >= 2) {
+            filters.title = { $regex: escapeRegex(q), $options: "i" };
+        }
     }
     const itemsPromise = Task.find(filters)
         .sort({dueDate: - 1, createdAt: -1})

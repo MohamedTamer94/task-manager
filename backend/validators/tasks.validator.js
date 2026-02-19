@@ -17,6 +17,7 @@ const listTasksQuerySchema = joi.object({
     q: joi.string()
         .trim()
         .min(1)
+        .max(64)
         .optional()
         .description("Search query for filtering results"),
     status: joi.string()
