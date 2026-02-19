@@ -84,6 +84,7 @@ frontend/
 1- Clone Repository
 ````bash
 git clone https://github.com/MohamedTamer94/task-manager
+cd task-manager
 ````
 
 2- Install dependencies
