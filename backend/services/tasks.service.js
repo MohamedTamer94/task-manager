@@ -39,6 +39,8 @@ exports.listTasks = async ({
     }
     if (q) {
         // match when search appears anywhere in text, case insensitive
+        // NOTE: This will not be effecient on large datasets, should be replaced
+        // with atlas search or elastic-search
         if (q && q.length >= 2) {
             filters.title = { $regex: escapeRegex(q), $options: "i" };
         }
